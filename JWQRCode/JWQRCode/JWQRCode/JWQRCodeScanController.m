@@ -20,12 +20,12 @@
 
 @interface JWQRCodeScanController ()<AVCaptureMetadataOutputObjectsDelegate, AVCaptureVideoDataOutputSampleBufferDelegate,UITextFieldDelegate>
 
-@property (nonatomic, strong) UITextField *inputTextField;
-@property (nonatomic, strong) UIImageView *pickImageView;
-@property (nonatomic, strong) UIImageView *lineImageView;
-@property (nonatomic, strong) UILabel *titleLabel;
-@property (nonatomic, strong) UIButton *flashlightButton;
-@property (nonatomic, strong) AVCaptureSession *scanSession;
+@property (nonatomic, strong) UITextField *jwQRCodeInputTextField;
+@property (nonatomic, strong) UIImageView *jwQRCodePickImageView;
+@property (nonatomic, strong) UIImageView *jwQRCodeLineImageView;
+@property (nonatomic, strong) UILabel *jwQRCodeTitleLabel;
+@property (nonatomic, strong) UIButton *jwQRCodeFlashlightButton;
+@property (nonatomic, strong) AVCaptureSession *jwQRCodeScanSession;
 
 @end
 
@@ -37,13 +37,13 @@
     
     self.title = @"扫描";
     
-    [self addNavControl];
+    [self configJWQRCodeNavControl];
     
-    [self configUI];
+    [self configJWQRCodeUI];
     
-    [self configAnimation];
+    [self configJWQRCodeAnimation];
     
-    [self configScanSetting];
+    [self configJWQRCodeScanSetting];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -51,13 +51,13 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)addNavControl
+- (void)configJWQRCodeNavControl
 {
     UIButton *tempButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 30)];
-    [tempButton setImage:[UIImage imageNamed:@"JWQRCode.bundle/qrcode_nav_back"]
+    [tempButton setImage:[self jwQRCodeImageWithName:@"jw_qrcode_nav_back"]
                 forState:UIControlStateNormal];
     tempButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-    [tempButton addTarget:self action:@selector(leftButtonAction:) forControlEvents:UIControlEventTouchUpInside];
+    [tempButton addTarget:self action:@selector(jwQRCodeLeftButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:tempButton];
 }
 
@@ -68,131 +68,131 @@
 
 #pragma mark - Lazy loading
 
-- (UITextField *)inputTextField
+- (UITextField *)jwQRCodeInputTextField
 {
-    if (!_inputTextField)
+    if (!_jwQRCodeInputTextField)
     {
-        self.inputTextField = [UITextField new];
-        _inputTextField.returnKeyType = UIReturnKeyGo;
-        _inputTextField.placeholder = @"扫描不出来，手动输入试试";
-        _inputTextField.textAlignment = NSTextAlignmentCenter;
-        _inputTextField.layer.cornerRadius = 15;
-        _inputTextField.layer.masksToBounds = YES;
-        _inputTextField.layer.borderWidth = (1.0 / [UIScreen mainScreen].scale);
-        _inputTextField.layer.borderColor = [UIColor whiteColor].CGColor;
-        _inputTextField.font = [UIFont fontWithName:@"Arial" size:15];
-        _inputTextField.textColor = [UIColor whiteColor];
-        _inputTextField.delegate = self;
-        [_inputTextField setValue:[UIColor whiteColor] forKeyPath:@"_placeholderLabel.textColor"];
+        self.jwQRCodeInputTextField = [UITextField new];
+        _jwQRCodeInputTextField.returnKeyType = UIReturnKeyGo;
+        _jwQRCodeInputTextField.placeholder = @"扫描不出来，手动输入试试";
+        _jwQRCodeInputTextField.textAlignment = NSTextAlignmentCenter;
+        _jwQRCodeInputTextField.layer.cornerRadius = 15;
+        _jwQRCodeInputTextField.layer.masksToBounds = YES;
+        _jwQRCodeInputTextField.layer.borderWidth = (1.0 / [UIScreen mainScreen].scale);
+        _jwQRCodeInputTextField.layer.borderColor = [UIColor whiteColor].CGColor;
+        _jwQRCodeInputTextField.font = [UIFont fontWithName:@"Arial" size:15];
+        _jwQRCodeInputTextField.textColor = [UIColor whiteColor];
+        _jwQRCodeInputTextField.delegate = self;
+        [_jwQRCodeInputTextField setValue:[UIColor whiteColor] forKeyPath:@"_placeholderLabel.textColor"];
         
         
-        [self.view addSubview:_inputTextField];
+        [self.view addSubview:_jwQRCodeInputTextField];
     }
-    return _inputTextField;
+    return _jwQRCodeInputTextField;
 }
 
-- (UIImageView *)pickImageView
+- (UIImageView *)jwQRCodePickImageView
 {
-    if (!_pickImageView)
+    if (!_jwQRCodePickImageView)
     {
-        self.pickImageView = [UIImageView new];
-        _pickImageView.image = [UIImage imageNamed:@"JWQRCode.bundle/qrcode_scan_picker"];
-        [self.view addSubview:_pickImageView];
+        self.jwQRCodePickImageView = [UIImageView new];
+        _jwQRCodePickImageView.image = [self jwQRCodeImageWithName:@"jw_qrcode_scan_picker"];//[UIImage imageNamed:@"JWQRCode.bundle/qrcode_scan_picker"];
+        [self.view addSubview:_jwQRCodePickImageView];
     }
-    return _pickImageView;
+    return _jwQRCodePickImageView;
 }
 
-- (UIImageView *)lineImageView
+- (UIImageView *)jwQRCodeLineImageView
 {
-    if (!_lineImageView)
+    if (!_jwQRCodeLineImageView)
     {
-        self.lineImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
+        self.jwQRCodeLineImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
                                                                            SCAN_TOP + 1,
                                                                            SCAN_WIDTH,
                                                                            2)];
-        _lineImageView.image = [UIImage imageNamed:@"JWQRCode.bundle/qrcode_scan_line"];
-        [self.view addSubview:_lineImageView];
+        _jwQRCodeLineImageView.image = [self jwQRCodeImageWithName:@"jw_qrcode_scan_line"];//[UIImage imageNamed:@"JWQRCode.bundle/qrcode_scan_line"];
+        [self.view addSubview:_jwQRCodeLineImageView];
     }
-    return _lineImageView;
+    return _jwQRCodeLineImageView;
 }
 
-- (UILabel *)titleLabel
+- (UILabel *)jwQRCodeTitleLabel
 {
-    if (!_titleLabel)
+    if (!_jwQRCodeTitleLabel)
     {
-        self.titleLabel = [UILabel new];
-        _titleLabel.textAlignment = NSTextAlignmentCenter;
-        _titleLabel.textColor = [UIColor colorWithRed:136/255.0 green:136/255.0 blue:136/255.0 alpha:1.0];
-        _titleLabel.font = [UIFont fontWithName:@"Arial" size:15];
-        _titleLabel.text = @"将二维码/条码放入框内，即可自动扫描";
-        [self.view addSubview:_titleLabel];
+        self.jwQRCodeTitleLabel = [UILabel new];
+        _jwQRCodeTitleLabel.textAlignment = NSTextAlignmentCenter;
+        _jwQRCodeTitleLabel.textColor = [UIColor colorWithRed:136/255.0 green:136/255.0 blue:136/255.0 alpha:1.0];
+        _jwQRCodeTitleLabel.font = [UIFont fontWithName:@"Arial" size:15];
+        _jwQRCodeTitleLabel.text = @"将二维码/条码放入框内，即可自动扫描";
+        [self.view addSubview:_jwQRCodeTitleLabel];
     }
-    return _titleLabel;
+    return _jwQRCodeTitleLabel;
 }
 
-- (UIButton *)flashlightButton
+- (UIButton *)jwQRCodeFlashlightButton
 {
-    if (!_flashlightButton)
+    if (!_jwQRCodeFlashlightButton)
     {
-        self.flashlightButton = [UIButton new];
-        _flashlightButton.hidden = YES;
-        [_flashlightButton setImage:[UIImage imageNamed:@"JWQRCode.bundle/qrcode_flashlight_close"]
+        self.jwQRCodeFlashlightButton = [UIButton new];
+        _jwQRCodeFlashlightButton.hidden = YES;
+        [_jwQRCodeFlashlightButton setImage:[self jwQRCodeImageWithName:@"jw_qrcode_flashlight_close"]
                            forState:UIControlStateNormal];
-        [_flashlightButton setImage:[UIImage imageNamed:@"JWQRCode.bundle/qrcode_flashlight_open"]
+        [_jwQRCodeFlashlightButton setImage:[self jwQRCodeImageWithName:@"jw_qrcode_flashlight_open"]
                            forState:UIControlStateSelected];
-        [_flashlightButton setTitle:@"轻触照亮"
+        [_jwQRCodeFlashlightButton setTitle:@"轻触照亮"
                            forState:UIControlStateNormal];
-        [_flashlightButton setTitle:@"轻触关闭"
+        [_jwQRCodeFlashlightButton setTitle:@"轻触关闭"
                            forState:UIControlStateSelected];
-        [_flashlightButton setTitleColor:[UIColor whiteColor]
+        [_jwQRCodeFlashlightButton setTitleColor:[UIColor whiteColor]
                                 forState:UIControlStateNormal];
-        [_flashlightButton addTarget:self
-                              action:@selector(flashlightAction:)
+        [_jwQRCodeFlashlightButton addTarget:self
+                              action:@selector(jwQRCodeRightButtonAction:)
                     forControlEvents:UIControlEventTouchDown];
-        _flashlightButton.titleLabel.font = [UIFont fontWithName:@"Arial" size:13];
-        _flashlightButton.imageEdgeInsets = UIEdgeInsetsMake(0, 25.5, 15, -25.5);
-        _flashlightButton.titleEdgeInsets = UIEdgeInsetsMake(25, -10, 0, 10);
-        [self.view addSubview:_flashlightButton];
+        _jwQRCodeFlashlightButton.titleLabel.font = [UIFont fontWithName:@"Arial" size:13];
+        _jwQRCodeFlashlightButton.imageEdgeInsets = UIEdgeInsetsMake(0, 25.5, 15, -25.5);
+        _jwQRCodeFlashlightButton.titleEdgeInsets = UIEdgeInsetsMake(25, -10, 0, 10);
+        [self.view addSubview:_jwQRCodeFlashlightButton];
         
     }
-    return _flashlightButton;
+    return _jwQRCodeFlashlightButton;
 }
 
-- (AVCaptureSession *)scanSession
+- (AVCaptureSession *)jwQRCodeScanSession
 {
-    if (!_scanSession)
+    if (!_jwQRCodeScanSession)
     {
-        self.scanSession = [[AVCaptureSession alloc] init];
+        self.jwQRCodeScanSession = [[AVCaptureSession alloc] init];
     }
-    return _scanSession;
+    return _jwQRCodeScanSession;
 }
 
 #pragma mark - helper
-- (void)configUI
+- (void)configJWQRCodeUI
 {
     self.view.backgroundColor = [UIColor blackColor];
     
-    self.pickImageView.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
+    self.jwQRCodePickImageView.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
                                           SCAN_TOP,
                                           SCAN_WIDTH,
                                           SCAN_WIDTH);
     
     [self configCoverViews];
     
-    self.inputTextField.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
+    self.jwQRCodeInputTextField.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
                                            SCAN_TOP-50,
                                            SCAN_WIDTH,
                                            30);
-    self.titleLabel.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
-                                       CGRectGetMaxY(self.pickImageView.frame) + 20,
+    self.jwQRCodeTitleLabel.frame = CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2.0,
+                                       CGRectGetMaxY(self.jwQRCodePickImageView.frame) + 20,
                                        SCAN_WIDTH,
                                        20);
     
     // 有闪光灯，才允许打开
     if ([UIImagePickerController isCameraDeviceAvailable:UIImagePickerControllerCameraDeviceRear])
     {
-        self.flashlightButton.frame = CGRectMake((SCREEN_WIDTH - 80)/2.0,
-                                                 CGRectGetMaxY(self.titleLabel.frame) + 20,
+        self.jwQRCodeFlashlightButton.frame = CGRectMake((SCREEN_WIDTH - 80)/2.0,
+                                                 CGRectGetMaxY(self.jwQRCodeTitleLabel.frame) + 20,
                                                  80,
                                                  60);
     }
@@ -204,38 +204,38 @@
     tempTopView.frame = CGRectMake(0,
                                    0,
                                    SCREEN_WIDTH,
-                                   CGRectGetMinY(self.pickImageView.frame));
+                                   CGRectGetMinY(self.jwQRCodePickImageView.frame));
     tempTopView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     [self.view addSubview:tempTopView];
     
     UIView *tempLeftView = [UIView new];
     tempLeftView.frame = CGRectMake(0,
-                                    CGRectGetMinY(self.pickImageView.frame),
-                                    CGRectGetMinX(self.pickImageView.frame),
-                                    CGRectGetHeight(self.pickImageView.frame));
+                                    CGRectGetMinY(self.jwQRCodePickImageView.frame),
+                                    CGRectGetMinX(self.jwQRCodePickImageView.frame),
+                                    CGRectGetHeight(self.jwQRCodePickImageView.frame));
     tempLeftView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     [self.view addSubview:tempLeftView];
     
     UIView *tempRightView = [UIView new];
-    tempRightView.frame = CGRectMake(CGRectGetMaxX(self.pickImageView.frame),
-                                     CGRectGetMinY(self.pickImageView.frame),
-                                     SCREEN_WIDTH - CGRectGetMaxX(self.pickImageView.frame),
-                                     CGRectGetHeight(self.pickImageView.frame));
+    tempRightView.frame = CGRectMake(CGRectGetMaxX(self.jwQRCodePickImageView.frame),
+                                     CGRectGetMinY(self.jwQRCodePickImageView.frame),
+                                     SCREEN_WIDTH - CGRectGetMaxX(self.jwQRCodePickImageView.frame),
+                                     CGRectGetHeight(self.jwQRCodePickImageView.frame));
     tempRightView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     [self.view addSubview:tempRightView];
     
     UIView *tempBottomView = [UIView new];
     tempBottomView.frame = CGRectMake(0,
-                                      CGRectGetMaxY(self.pickImageView.frame),
+                                      CGRectGetMaxY(self.jwQRCodePickImageView.frame),
                                       SCREEN_WIDTH,
-                                      SCREEN_HEIGHT - CGRectGetMaxY(self.pickImageView.frame));
+                                      SCREEN_HEIGHT - CGRectGetMaxY(self.jwQRCodePickImageView.frame));
     tempBottomView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     [self.view addSubview:tempBottomView];
 }
 
-- (void)configScanSetting
+- (void)configJWQRCodeScanSetting
 {
-    if ([self canUseCamera])
+    if ([self jwQRCodeCanUseCamera])
     {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             
@@ -263,23 +263,23 @@
             // 扫码Session 二维码读取区域设置
             if ([UIScreen mainScreen].bounds.size.height == 480)
             {
-                [self.scanSession setSessionPreset:AVCaptureSessionPreset640x480];
+                [self.jwQRCodeScanSession setSessionPreset:AVCaptureSessionPreset640x480];
             }
             else
             {
-                [self.scanSession setSessionPreset:AVCaptureSessionPresetHigh];
+                [self.jwQRCodeScanSession setSessionPreset:AVCaptureSessionPresetHigh];
             }
             
             // 添加输出流到session
-            if ([self.scanSession canAddOutput:tempOutput])
+            if ([self.jwQRCodeScanSession canAddOutput:tempOutput])
             {
-                [self.scanSession addOutput:tempOutput];
-                [self.scanSession addOutput:tempLightOutput];
+                [self.jwQRCodeScanSession addOutput:tempOutput];
+                [self.jwQRCodeScanSession addOutput:tempLightOutput];
             }
             // 添加输入流到session
-            if ([self.scanSession canAddInput:tempInput])
+            if ([self.jwQRCodeScanSession canAddInput:tempInput])
             {
-                [self.scanSession addInput:tempInput];
+                [self.jwQRCodeScanSession addInput:tempInput];
             }
             
             // 配置扫码类型(配置扫码类型，需要先将output添加到session，否则会crash)
@@ -292,13 +292,13 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 // 摄像区域
-                AVCaptureVideoPreviewLayer *tempPreviewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.scanSession];
+                AVCaptureVideoPreviewLayer *tempPreviewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.jwQRCodeScanSession];
                 tempPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
                 tempPreviewLayer.frame = self.view.layer.bounds;
                 [self.view.layer insertSublayer:tempPreviewLayer atIndex:0];
                 
                 // Start
-                [self.scanSession startRunning];
+                [self.jwQRCodeScanSession startRunning];
             });
         });
     }
@@ -317,7 +317,7 @@
     }
 }
 
-- (BOOL)canUseCamera
+- (BOOL)jwQRCodeCanUseCamera
 {
     // 先检测有没有相机
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
@@ -354,16 +354,16 @@
     return YES;
 }
 
-- (void)configAnimation
+- (void)configJWQRCodeAnimation
 {
-    [self animationDown];
+    [self jwQRCodeAnimationDown];
 }
 
-- (void)animationDown
+- (void)jwQRCodeAnimationDown
 {
     [UIView animateWithDuration:1.5 animations:^{
         
-        [self.lineImageView setFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
+        [self.jwQRCodeLineImageView setFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
                                                 SCAN_TOP + SCAN_WIDTH - 3,
                                                 SCAN_WIDTH,
                                                 2)];
@@ -372,16 +372,16 @@
         
         if (finished)
         {
-            [self animationUp];
+            [self jwQRCodeAnimationUp];
         }
     }];
 }
 
-- (void)animationUp
+- (void)jwQRCodeAnimationUp
 {
     [UIView animateWithDuration:1.5 animations:^{
         
-        [self.lineImageView setFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
+        [self.jwQRCodeLineImageView setFrame:CGRectMake((SCREEN_WIDTH - SCAN_WIDTH)/2,
                                                 SCAN_TOP + 1,
                                                 SCAN_WIDTH,
                                                 2)];
@@ -390,24 +390,24 @@
         
         if (finished)
         {
-            [self animationDown];
+            [self jwQRCodeAnimationDown];
         }
     }];
 }
 
-- (void)leftButtonAction:(id)sender
+- (void)jwQRCodeLeftButtonAction:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)flashlightAction:(id)sender
+- (void)jwQRCodeRightButtonAction:(id)sender
 {
-    self.flashlightButton.selected = !self.flashlightButton.selected;
+    self.jwQRCodeFlashlightButton.selected = !self.jwQRCodeFlashlightButton.selected;
     
-    [self flashlightOn:self.flashlightButton.selected];
+    [self jwQRCodeFlashlightOn:self.jwQRCodeFlashlightButton.selected];
 }
 
-- (void)flashlightOn:(BOOL)on
+- (void)jwQRCodeFlashlightOn:(BOOL)on
 {
     Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
     if (captureDeviceClass != nil)
@@ -441,14 +441,41 @@
     }
 }
 
-- (void)callbackResult:(NSString *)result
+- (void)jwQRCodeCallback:(NSString *)result
 {
-    [self.scanSession stopRunning];
+    [self.jwQRCodeScanSession stopRunning];
     
     __weak __typeof(self)this = self;
     [self dismissViewControllerAnimated:YES completion:^{
         !this.scan?:this.scan(result);
     }];
+}
+
+- (UIImage *)jwQRCodeImageWithName:(NSString *)imgName
+{
+    NSBundle *tempBundle = [self jwQRCodeGetResourceBundle];
+    if (tempBundle)
+    {
+        return [UIImage imageNamed:imgName inBundle:tempBundle compatibleWithTraitCollection:nil];
+    }
+    else
+    {
+        NSString *tempFilePath = [[NSBundle mainBundle] pathForResource:[NSString stringWithFormat:@"JWQRCode.bundle/%@",imgName] ofType:@"png"];
+        return [UIImage imageWithContentsOfFile:tempFilePath];
+    }
+}
+
+- (NSBundle *)jwQRCodeGetResourceBundle
+{
+    NSBundle *tempBundle = [NSBundle bundleForClass:[self class]];
+    NSURL *tempBundleUrl = [tempBundle URLForResource:@"JWQRCode" withExtension:@"bundle"];
+    NSBundle *tempResourceBundle = [NSBundle bundleWithURL:tempBundleUrl];
+    if (!tempResourceBundle)
+    {
+        NSString *tempBundlePath = [tempBundle.resourcePath stringByAppendingPathComponent:@"JWQRCode.bundle"];
+        tempResourceBundle = [NSBundle bundleWithPath:tempBundlePath];
+    }
+    return tempResourceBundle;
 }
 
 #pragma mark - AVCaptureMetadataOutputObjectsDelegate
@@ -461,13 +488,13 @@
         stringValue = metadataObject.stringValue;
     }
     
-    [self callbackResult:stringValue];
+    [self jwQRCodeCallback:stringValue];
 }
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    if (self.flashlightButton.selected) return;
+    if (self.jwQRCodeFlashlightButton.selected) return;
     
     CFDictionaryRef tempRef = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
     NSDictionary *tempData = [[NSMutableDictionary alloc] initWithDictionary:(__bridge NSDictionary *)tempRef];
@@ -475,7 +502,7 @@
     NSDictionary *tempMetaDic = [[tempData objectForKey:(NSString *)kCGImagePropertyExifDictionary] mutableCopy];
     CGFloat tempValue = [[tempMetaDic objectForKey:(NSString *)kCGImagePropertyExifBrightnessValue] floatValue];
     
-    self.flashlightButton.hidden = (tempValue > -1.5);
+    self.jwQRCodeFlashlightButton.hidden = (tempValue > -1.5);
 }
 
 #pragma mark - UITextField Delegate
@@ -487,7 +514,7 @@
     {
         [textField resignFirstResponder];
         
-        [self callbackResult:tempValue];
+        [self jwQRCodeCallback:tempValue];
     }
     else
     {

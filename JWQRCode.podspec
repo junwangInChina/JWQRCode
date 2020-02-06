@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "JWQRCode"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "二维码、条形码扫描"
 
   #主页
